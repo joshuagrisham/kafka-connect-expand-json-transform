@@ -1,0 +1,3 @@
+# Force later version of maven when building via jitpack.io
+before_install:
+   - mvn wrapper:wrapper -Dmaven=3.9.9
