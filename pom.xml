@@ -6,8 +6,15 @@
 
     <groupId>com.github.joshuagrisham.kafka.connect</groupId>
     <artifactId>expand-json-transform</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
     <name>Kafka Connect Expand JSON Transform</name>
+    <licenses>
+        <license>
+            <name>Apache-2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 
     <properties>
         <compiler-plugin.version>3.12.1</compiler-plugin.version>
@@ -54,5 +61,52 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>io.confluent</groupId>
+                <version>0.12.0</version>
+                <artifactId>kafka-connect-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <id>hub</id>
+                        <goals>
+                            <goal>kafka-connect</goal>
+                        </goals>
+                        <configuration>
+                            <title>Expand JSON Transform</title>
+                            <description>
+                                Single Message Transform (SMT) to parse JSON objects from given source field strings and expand them into appropriate Connect API structures.
+                            </description>
+                            <documentationUrl>
+                                https://github.com/joshuagrisham/kafka-connect-expand-json-transform/blob/main/README.md
+                            </documentationUrl>
+                            <sourceUrl>
+                                https://github.com/joshuagrisham/kafka-connect-expand-json-transform
+                            </sourceUrl>
+
+                            <ownerUsername>joshuagrisham</ownerUsername>
+                            <ownerType>user</ownerType>
+                            <ownerName>Joshua Grisham</ownerName>
+                            <ownerUrl>https://github.com/joshuagrisham</ownerUrl>
+
+                            <kafkaConnectApi>false</kafkaConnectApi>
+                            <componentTypes>
+                                <componentType>transform</componentType>
+                            </componentTypes>
+                            <tags>
+                                <tag>json</tag>
+                            </tags>
+                            <confluentControlCenterIntegration>true</confluentControlCenterIntegration>
+                            <singleMessageTransforms>true</singleMessageTransforms>
+                            <supportedEncodings></supportedEncodings>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

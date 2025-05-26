@@ -1,6 +1,6 @@
 # Kafka Connect Expand JSON Transform (SMT)
 
-Kafka Connect Single Message Transform (SMT) to parse JSON objects from given source fields and expand them into appropriate Connect API structures.
+Kafka Connect Single Message Transform (SMT) to parse JSON objects from given source field strings and expand them into appropriate Connect API structures.
 
 ## Background
 
@@ -38,6 +38,6 @@ You can also fetch it via <https://jitpack.io> using Maven, Gradle, etc if desir
 ```sh
 "transforms": "ExpandJson",
 "transforms.ExpandJson.type": "com.github.joshuagrisham.kafka.connect.transforms.ExpandJson$Value",
-"transforms.ExpandJson.fields": "someJsonTextField,anotherJsonTextField"
+"transforms.ExpandJson.fields": "someJsonTextField,anotherJsonTextField",
 "transforms.ExpandJson.schema.name.prefix": "com.github.joshuagrisham.kafka.test.MyJsonRecord"
 ```

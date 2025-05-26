@@ -229,7 +229,7 @@ public abstract class ExpandJson<R extends ConnectRecord<R>> implements Transfor
                     structBuilder.field(entry.getKey(), inferSchema(entry.getValue()));
                 }
                 structBuilder.optional();
-                
+
                 // Handle generating and setting schema name if configured to do so
                 if (schemaNamePrefix != null && !schemaNamePrefix.isBlank()) {
                     if (generatedSchemaNames.get(structBuilder.fields()) == null) {
