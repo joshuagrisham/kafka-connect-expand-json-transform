@@ -2,6 +2,12 @@
 
 Kafka Connect Single Message Transform (SMT) to parse JSON objects from given source field strings and expand them into appropriate Connect API structures.
 
+## Compatibility
+
+- Use `0.0.x` versions if you need compatibility with Kafka 3.x and Java 11.
+- Use `0.1.x` versions if you need compatibility with Kafka 4.x and Java 17.
+- See [Releases](https://github.com/joshuagrisham/kafka-connect-expand-json-transform/releases) for the latest releases.
+
 ## Background
 
 Inspired by [RedHatInsights ExpandJSON](https://github.com/RedHatInsights/expandjsonsmt), but aims to overcome the following issues:

@@ -1,0 +1,15 @@
+{
+  "name": "Java 17",
+  "image": "mcr.microsoft.com/devcontainers/java:17",
+  "features": {
+     "ghcr.io/devcontainers/features/java:1": {
+        "version": "none",
+        "installGradle": "false",
+        "installMaven": "true"
+    }
+  },
+  // Temporary (pun graciously accepted) workaround if using podman; see https://github.com/devcontainers/features/issues/1480 and many like it
+  "mounts": [
+    "source=/tmp,target=/tmp,type=bind"
+  ]
+}
