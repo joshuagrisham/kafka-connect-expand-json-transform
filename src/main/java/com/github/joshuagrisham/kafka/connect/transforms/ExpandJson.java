@@ -117,9 +117,14 @@ public abstract class ExpandJson<R extends ConnectRecord<R>> implements Transfor
         final Struct updatedValue = new Struct(updatedSchema);
         for (Field field : updatedSchema.schema().fields()) {
             if (fields.contains(field.name())) {
-                SchemaAndValue newSchemaAndValue = JSONCONVERTER.toConnectData(record.topic(),
-                    getInferredEnvelopeValue(currentValue.get(field.name()))); // inferring envelope schema+value here as KIP-301 is not yet implemented
-                updatedValue.put(field, newSchemaAndValue.value());
+                Object jsonFieldValue = currentValue.get(field.name());
+                if (jsonFieldValue == null) {
+                    updatedValue.put(field, null);
+                } else {
+                    SchemaAndValue newSchemaAndValue = JSONCONVERTER.toConnectData(record.topic(),
+                        getInferredEnvelopeValue(jsonFieldValue)); // inferring envelope schema+value here as KIP-301 is not yet implemented
+                    updatedValue.put(field, newSchemaAndValue.value());
+                }
             } else {
                 updatedValue.put(field, currentValue.get(field));
             }
@@ -134,11 +139,18 @@ public abstract class ExpandJson<R extends ConnectRecord<R>> implements Transfor
             return updatedSchema;
 
         final SchemaBuilder builder = SchemaUtil.copySchemaBasics(currentSchema, SchemaBuilder.struct());
+        boolean hasNullJsonField = false;
         for (Field field : currentSchema.fields()) {
             if (fields.contains(field.name())) {
-                SchemaAndValue newSchemaAndValue = JSONCONVERTER.toConnectData(topic,
-                    getInferredEnvelopeValue(currentValue.get(field.name()))); // inferring envelope schema+value here as KIP-301 is not yet implemented
-                builder.field(field.name(), newSchemaAndValue.schema());
+                Object jsonFieldValue = currentValue.get(field.name());
+                if (jsonFieldValue == null) {
+                    hasNullJsonField = true;
+                    builder.field(field.name(), Schema.OPTIONAL_STRING_SCHEMA);
+                } else {
+                    SchemaAndValue newSchemaAndValue = JSONCONVERTER.toConnectData(topic,
+                        getInferredEnvelopeValue(jsonFieldValue)); // inferring envelope schema+value here as KIP-301 is not yet implemented
+                    builder.field(field.name(), newSchemaAndValue.schema());
+                }
             } else {
                 builder.field(field.name(), field.schema());
             }
@@ -148,7 +160,11 @@ public abstract class ExpandJson<R extends ConnectRecord<R>> implements Transfor
             builder.optional();
 
         updatedSchema = builder.build();
-        schemaUpdateCache.put(currentSchema, updatedSchema);
+        // Do not cache schemas built from null values so the schema is re-inferred
+        // once a non-null value is available, producing the correct field types.
+        if (!hasNullJsonField) {
+            schemaUpdateCache.put(currentSchema, updatedSchema);
+        }
         return updatedSchema;
     }
 
