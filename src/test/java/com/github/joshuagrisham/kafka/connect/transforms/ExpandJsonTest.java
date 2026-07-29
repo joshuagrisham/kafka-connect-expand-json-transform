@@ -199,4 +199,49 @@ public class ExpandJsonTest {
         //TODO flesh this out with a good test... 
     }
 
+    @Test
+    public void nullJsonFieldValueDoesNotCrash() {
+        xformValue.configure(Map.of(ConfigName.FIELDS, "jsonValue"));
+
+        Struct inputWithNullJson = new Struct(STRUCT_WITH_JSON_STRING_SCHEMA)
+            .put("jsonValue", null)
+            .put("numberValue", 42)
+            .put("booleanValue", true);
+
+        SourceRecord source = new SourceRecord(null, null, "topic", 0,
+            null, null, STRUCT_WITH_JSON_STRING_SCHEMA, inputWithNullJson);
+        SourceRecord transformed = xformValue.apply(source);
+
+        // Null JSON field falls back to OPTIONAL_STRING_SCHEMA; overall schema is unchanged
+        assertEquals(STRUCT_WITH_JSON_STRING_SCHEMA, transformed.valueSchema());
+        Struct transformedValue = (Struct) transformed.value();
+        assertNull(transformedValue.get("jsonValue"));
+        assertEquals(42, transformedValue.get("numberValue"));
+        assertEquals(true, transformedValue.get("booleanValue"));
+    }
+
+    @Test
+    public void nullJsonFieldDoesNotPolluteSchemaCacheForSubsequentRecords() {
+        xformValue.configure(Map.of(ConfigName.FIELDS, "jsonValue"));
+
+        // First record: JSON field is null — schema must not be cached with OPTIONAL_STRING_SCHEMA
+        Struct inputWithNullJson = new Struct(STRUCT_WITH_JSON_STRING_SCHEMA)
+            .put("jsonValue", null)
+            .put("numberValue", 42)
+            .put("booleanValue", true);
+
+        SourceRecord sourceNull = new SourceRecord(null, null, "topic", 0,
+            null, null, STRUCT_WITH_JSON_STRING_SCHEMA, inputWithNullJson);
+        xformValue.apply(sourceNull);
+
+        // Second record: same input schema, but JSON field is now populated
+        SourceRecord sourceNonNull = new SourceRecord(null, null, "topic", 0,
+            null, null, STRUCT_WITH_JSON_STRING_SCHEMA, STRUCT_WITH_JSON_STRING_VALUE);
+        SourceRecord transformed = xformValue.apply(sourceNonNull);
+
+        // Schema must be properly inferred from the actual JSON, not left as OPTIONAL_STRING_SCHEMA
+        assertEquals(STRUCT_WITH_JSON_STRUCT_SCHEMA, transformed.valueSchema());
+        assertEquals(STRUCT_WITH_JSON_STRUCT_VALUE, transformed.value());
+    }
+
 }
